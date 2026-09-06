@@ -25,7 +25,7 @@ export function ProjectCard({ project }: { project: Project }) {
       }`}
     >
       <div className="border-b border-border-light p-4 dark:border-border-dark">
-        <div className="aspect-video overflow-hidden rounded-lg">
+        <div className="aspect-video overflow-hidden rounded-lg bg-surface-light-raised dark:bg-surface-dark-raised">
           {project.images && project.images.length > 0 ? (
             <ProjectGallery images={project.images} title={project.title} />
           ) : (

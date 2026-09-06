@@ -15,7 +15,7 @@ export function ProjectGallery({ images, title }: { images: string[]; title: str
       <img
         src={images[index]}
         alt={`Captura de tela ${index + 1} de ${title}`}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-contain"
         loading="lazy"
       />
 
