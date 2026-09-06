@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: toggled via .dark on <html> (see ThemeContext) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Brand accents — blue and red, used sparingly against black/white */
+  --color-accent-blue: #3b6fed;
+  --color-accent-blue-soft: #3b6fed1a;
+  --color-accent-red: #e5484d;
+  --color-accent-red-soft: #e5484d1a;
+
+  /* Light surfaces */
+  --color-surface-light: #ffffff;
+  --color-surface-light-raised: #f6f6f8;
+  --color-border-light: #e6e6ea;
+  --color-ink-light: #0a0a0d;
+  --color-ink-light-muted: #55555f;
+
+  /* Dark surfaces */
+  --color-surface-dark: #0a0a0d;
+  --color-surface-dark-raised: #131318;
+  --color-border-dark: #232329;
+  --color-ink-dark: #f4f4f6;
+  --color-ink-dark-muted: #9a9aa5;
+
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border-light dark:border-border-dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+
+  html:not(.dark) {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-surface-light text-ink-light dark:bg-surface-dark dark:text-ink-dark;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    @apply bg-accent-blue/25 text-inherit;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent-blue;
+  }
+}
+
+@layer utilities {
+  .reveal {
+    opacity: 0;
+  }
+
+  .reveal.is-visible {
+    animation: var(--animate-fade-up);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal.is-visible,
+    .animate-fade-up {
+      opacity: 1;
+      animation: none;
+      transform: none;
+    }
+  }
+}
