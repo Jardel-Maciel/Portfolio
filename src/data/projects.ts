@@ -3,6 +3,7 @@ export interface Project {
   tag: string
   description: string
   stack: string[]
+  images?: string[]
   liveUrl?: string
   githubUrl?: string
   featured?: boolean

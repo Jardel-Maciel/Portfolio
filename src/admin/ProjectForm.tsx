@@ -1,28 +1,70 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
-import type { ProjectInput } from '@/lib/api'
+import { useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
+import { FiX } from 'react-icons/fi'
+import { ApiError, MAX_PROJECT_IMAGES, uploadImage, type ProjectInput } from '@/lib/api'
 
 const emptyForm: ProjectInput = {
   title: '',
   tag: '',
   description: '',
   stack: [],
+  images: [],
   liveUrl: '',
   githubUrl: '',
   featured: false,
   position: 0,
 }
 
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024
+
 interface ProjectFormProps {
+  token: string
   initial?: ProjectInput
   onSubmit: (data: ProjectInput) => Promise<void>
   onCancel: () => void
 }
 
-export function ProjectForm({ initial, onSubmit, onCancel }: ProjectFormProps) {
+export function ProjectForm({ token, initial, onSubmit, onCancel }: ProjectFormProps) {
   const [form, setForm] = useState<ProjectInput>(initial ?? emptyForm)
   const [stackText, setStackText] = useState((initial?.stack ?? []).join(', '))
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const remainingSlots = MAX_PROJECT_IMAGES - form.images.length
+
+  const handleFilesSelected = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    event.target.value = ''
+    if (files.length === 0) return
+
+    const toUpload = files.slice(0, remainingSlots)
+    setUploadError(null)
+    setIsUploading(true)
+    try {
+      for (const file of toUpload) {
+        if (!file.type.startsWith('image/')) {
+          setUploadError(`"${file.name}" não é uma imagem.`)
+          continue
+        }
+        if (file.size > MAX_IMAGE_BYTES) {
+          setUploadError(`"${file.name}" passa de 8MB.`)
+          continue
+        }
+        const { url } = await uploadImage(token, file)
+        setForm((f) => ({ ...f, images: [...f.images, url] }))
+      }
+    } catch (err) {
+      setUploadError(err instanceof ApiError ? err.message : 'Não foi possível enviar a imagem.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const removeImage = (url: string) => {
+    setForm((f) => ({ ...f, images: f.images.filter((img) => img !== url) }))
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -82,6 +124,44 @@ export function ProjectForm({ initial, onSubmit, onCancel }: ProjectFormProps) {
           placeholder="React, TypeScript, Flask"
           className={inputClass}
         />
+      </Field>
+
+      <Field label={`Imagens do projeto (até ${MAX_PROJECT_IMAGES}, opcional)`}>
+        <div className="flex flex-wrap gap-3">
+          {form.images.map((url) => (
+            <div key={url} className="group relative h-20 w-32 overflow-hidden rounded-lg border border-border-light dark:border-border-dark">
+              <img src={url} alt="" className="h-full w-full object-cover" />
+              <button
+                type="button"
+                aria-label="Remover imagem"
+                onClick={() => removeImage(url)}
+                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-surface-dark/80 text-surface-light opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <FiX className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+
+          {remainingSlots > 0 && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="flex h-20 w-32 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border-light text-xs text-ink-light-muted transition-colors hover:border-accent-blue hover:text-accent-blue disabled:opacity-60 dark:border-border-dark dark:text-ink-dark-muted"
+            >
+              {isUploading ? 'Enviando…' : 'Adicionar'}
+            </button>
+          )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          multiple
+          onChange={handleFilesSelected}
+          className="hidden"
+        />
+        {uploadError && <p className="mt-1 text-xs text-accent-red">{uploadError}</p>}
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">

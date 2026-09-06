@@ -68,10 +68,38 @@ export interface ProjectInput {
   tag: string
   description: string
   stack: string[]
+  images: string[]
   liveUrl: string
   githubUrl: string
   featured: boolean
   position: number
+}
+
+export const MAX_PROJECT_IMAGES = 5
+
+/**
+ * Uploads one image file to the backend (which forwards it to Cloudinary)
+ * and returns its public URL. Bypasses request() because this is the one
+ * call that sends multipart/form-data instead of JSON.
+ */
+export async function uploadImage(token: string, file: File): Promise<{ url: string }> {
+  if (!API_URL) throw new ApiError('VITE_API_URL não configurada')
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch(`${API_URL}/api/admin/upload`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    throw new ApiError(body?.error ?? `Erro ${response.status}`, response.status)
+  }
+
+  return response.json()
 }
 
 export function createProject(token: string, data: ProjectInput): Promise<ApiProject> {

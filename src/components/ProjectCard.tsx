@@ -1,6 +1,7 @@
 import { FiArrowUpRight, FiGithub, FiPlus } from 'react-icons/fi'
 import type { Project } from '@/data/projects'
 import { ProjectMockup } from '@/components/ProjectMockup'
+import { ProjectGallery } from '@/components/ProjectGallery'
 
 export function ProjectCard({ project }: { project: Project }) {
   if (project.comingSoon) {
@@ -25,7 +26,11 @@ export function ProjectCard({ project }: { project: Project }) {
     >
       <div className="border-b border-border-light p-4 dark:border-border-dark">
         <div className="aspect-video overflow-hidden rounded-lg">
-          <ProjectMockup />
+          {project.images && project.images.length > 0 ? (
+            <ProjectGallery images={project.images} title={project.title} />
+          ) : (
+            <ProjectMockup />
+          )}
         </div>
       </div>
 

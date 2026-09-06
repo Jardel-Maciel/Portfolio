@@ -17,6 +17,7 @@ function toFormInput(project: ApiProject): ProjectInput {
     tag: project.tag,
     description: project.description,
     stack: project.stack,
+    images: project.images ?? [],
     liveUrl: project.liveUrl ?? '',
     githubUrl: project.githubUrl ?? '',
     featured: project.featured ?? false,
@@ -88,7 +89,7 @@ export function Dashboard({ token, onLogout }: { token: string; onLogout: () => 
 
       {editingId === 'new' && (
         <div className="mt-8">
-          <ProjectForm onSubmit={handleCreate} onCancel={() => setEditingId(null)} />
+          <ProjectForm token={token} onSubmit={handleCreate} onCancel={() => setEditingId(null)} />
         </div>
       )}
 
@@ -100,6 +101,7 @@ export function Dashboard({ token, onLogout }: { token: string; onLogout: () => 
             editingId === project.id ? (
               <ProjectForm
                 key={project.id}
+                token={token}
                 initial={toFormInput(project)}
                 onSubmit={(data) => handleUpdate(project.id, data)}
                 onCancel={() => setEditingId(null)}

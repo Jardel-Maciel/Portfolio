@@ -39,6 +39,12 @@ def init_db() -> None:
             """
         )
 
+        # Added after the table already existed in production — plain ALTER
+        # with IF NOT EXISTS keeps this idempotent, same as the CREATE above.
+        conn.execute(
+            "ALTER TABLE projects ADD COLUMN IF NOT EXISTS images TEXT[] NOT NULL DEFAULT '{}'"
+        )
+
         (count,) = conn.execute("SELECT count(*) FROM projects").fetchone().values()
         if count == 0:
             conn.execute(
@@ -74,8 +80,8 @@ def create_project(data: dict) -> dict:
     with get_connection() as conn:
         row = conn.execute(
             """
-            INSERT INTO projects (title, tag, description, stack, live_url, github_url, featured, position)
-            VALUES (%(title)s, %(tag)s, %(description)s, %(stack)s, %(live_url)s, %(github_url)s, %(featured)s, %(position)s)
+            INSERT INTO projects (title, tag, description, stack, images, live_url, github_url, featured, position)
+            VALUES (%(title)s, %(tag)s, %(description)s, %(stack)s, %(images)s, %(live_url)s, %(github_url)s, %(featured)s, %(position)s)
             RETURNING *
             """,
             data,
@@ -93,6 +99,7 @@ def update_project(project_id: int, data: dict) -> dict | None:
                 tag = %(tag)s,
                 description = %(description)s,
                 stack = %(stack)s,
+                images = %(images)s,
                 live_url = %(live_url)s,
                 github_url = %(github_url)s,
                 featured = %(featured)s,
@@ -118,6 +125,7 @@ def _serialize(row: dict) -> dict:
         "tag": row["tag"],
         "description": row["description"],
         "stack": row["stack"] or [],
+        "images": row["images"] or [],
         "liveUrl": row["live_url"],
         "githubUrl": row["github_url"],
         "featured": row["featured"],
