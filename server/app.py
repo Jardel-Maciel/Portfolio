@@ -96,6 +96,11 @@ def login():
 @app.post("/api/admin/upload")
 @require_admin
 def admin_upload_image():
+    cfg = cloudinary.config()
+    if not cfg.cloud_name or not cfg.api_key or not cfg.api_secret:
+        app.logger.error("Cloudinary não configurado: faltam CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET")
+        return jsonify({"error": "Cloudinary não configurado no servidor"}), 500
+
     file = request.files.get("file")
     if not file or not file.filename:
         return jsonify({"error": "Nenhum arquivo enviado"}), 400
@@ -104,7 +109,8 @@ def admin_upload_image():
 
     try:
         result = cloudinary.uploader.upload(file, folder="portfolio", resource_type="image")
-    except Exception:
+    except Exception as exc:
+        app.logger.exception("Falha ao enviar imagem para o Cloudinary: %s", exc)
         return jsonify({"error": "Falha ao enviar a imagem"}), 502
 
     return jsonify({"url": result["secure_url"]}), 201
