@@ -4,10 +4,10 @@
  */
 export const siteConfig = {
   name: 'Jardel Maciel',
-  role: 'Desenvolvedor Front-End',
+  role: 'Desenvolvedor Full Stack',
   email: 'jardel.maciel22@gmail.com',
-  github: 'https://github.com/jardelmaciel',
-  linkedin: 'https://linkedin.com/in/jardelmaciel',
+  github: 'https://github.com/Jardel-Maciel',
+  linkedin: 'https://www.linkedin.com/in/jardel-maciel-dos-santos',
 }
 
 export const navLinks = [
