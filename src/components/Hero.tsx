@@ -19,7 +19,7 @@ export function Hero() {
         <h1 className="animate-fade-up mt-5 text-4xl font-semibold tracking-tight text-ink-light [animation-delay:80ms] sm:text-6xl lg:text-7xl dark:text-ink-dark">
           Desenvolvedor
           <br />
-          <span className="text-accent-blue">Front-End</span>
+          <span className="text-accent-blue">Full Stack</span>
           <span className="text-accent-red">.</span>
         </h1>
 
